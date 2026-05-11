@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sunit's AI Command Dashboard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f5f5f3;--bg3:#eeede9;
+  --text:#1a1a18;--text2:#5f5e5a;--text3:#888780;
+  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
+  --info-bg:#e6f1fb;--info-text:#185fa5;
+  --radius:10px;--radius-lg:14px;
+  --font:'Segoe UI',system-ui,sans-serif;--mono:'Consolas',monospace;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1e1e1c;--bg2:#252523;--bg3:#2c2c2a;
+    --text:#f0efeb;--text2:#b4b2a9;--text3:#888780;
+    --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+    --info-bg:#042c53;--info-text:#85b7eb;
+  }
+}
+body{font-family:var(--font);background:var(--bg3);color:var(--text);min-height:100vh;padding:2rem 1rem}
+.container{max-width:980px;margin:0 auto}
+.header{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.75rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.header-left h1{font-size:19px;font-weight:600;display:flex;align-items:center;gap:8px}
+.header-left p{font-size:12px;color:var(--text2);margin-top:3px}
+.sync-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.search-wrap{display:flex;align-items:center;gap:8px;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:7px 14px;min-width:200px}
+.search-wrap input{background:none;border:none;outline:none;font-size:13px;color:var(--text);width:100%}
+.sync-btn{display:flex;align-items:center;gap:5px;font-size:12px;padding:7px 14px;border-radius:var(--radius);border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;white-space:nowrap;transition:all 0.15s}
+.sync-btn:hover{background:var(--text);color:var(--bg)}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#888;display:inline-block;margin-right:4px}
+.status-dot.ok{background:#3B6D11}
+.status-dot.err{background:#993C1D}
+.status-dot.loading{background:#854F0B;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.controls{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:.9rem 1.75rem;margin-bottom:1rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tab{font-size:12px;font-weight:500;padding:5px 14px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:all 0.15s}
+.tab.active,.tab:hover{background:var(--text);color:var(--bg);border-color:var(--text)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:16px;position:relative;overflow:hidden;transition:all 0.15s;display:flex;flex-direction:column}
+.card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.07)}
+.card-icon{position:absolute;right:14px;top:14px;font-size:20px;color:var(--text3)}
+.cmd-tag{font-size:11px;font-weight:600;font-family:var(--mono);color:var(--info-text);background:var(--info-bg);padding:3px 9px;border-radius:5px;display:inline-block;margin-bottom:10px}
+.cmd-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px}
+.cmd-desc{font-size:12px;color:var(--text2);line-height:1.5;flex:1}
+.badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;margin-left:5px;vertical-align:middle}
+.badge-govt{background:#EAF3DE;color:#3B6D11}
+.badge-exam{background:#E6F1FB;color:#185FA5}
+.badge-yt{background:#FAECE7;color:#993C1D}
+.badge-office{background:#FAEEDA;color:#854F0B}
+.badge-ai{background:#EEEDFE;color:#534AB7}
+.fire-btn{margin-top:12px;font-size:12px;font-weight:500;padding:7px 12px;border-radius:var(--radius);border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;width:100%;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.fire-btn:hover{background:var(--text);color:var(--bg);border-color:var(--text)}
+.row-btns{display:flex;gap:6px;margin-top:6px}
+.sm-btn{flex:1;font-size:11px;padding:5px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;transition:all 0.15s}
+.sm-btn:hover{background:var(--bg2);color:var(--text)}
+.add-card{background:transparent;border:0.5px dashed var(--border2);border-radius:var(--radius-lg);padding:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text3);font-size:13px;transition:all 0.15s;min-height:160px}
+.add-card:hover{color:var(--text);border-color:var(--text);background:var(--bg2)}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg);border-radius:var(--radius-lg);padding:1.75rem;width:440px;max-width:95vw;border:0.5px solid var(--border2)}
+.modal h2{font-size:16px;font-weight:600;margin-bottom:1.25rem}
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:500}
+.field input,.field select,.field textarea{width:100%;padding:8px 12px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg2);color:var(--text);font-size:13px;font-family:var(--font);outline:none}
+.field textarea{resize:vertical;min-height:80px}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem}
+.btn-cancel{padding:8px 18px;border-radius:var(--radius);border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-size:13px}
+.btn-save{padding:8px 18px;border-radius:var(--radius);border:none;background:var(--text);color:var(--bg);cursor:pointer;font-size:13px;font-weight:500}
+.fire-modal{background:var(--bg);border-radius:var(--radius-lg);padding:1.75rem;width:560px;max-width:95vw;border:0.5px solid var(--border2)}
+.fire-modal h2{font-size:15px;font-weight:600;margin-bottom:1rem}
+.fire-modal textarea{width:100%;padding:10px 14px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg2);color:var(--text);font-size:14px;font-family:var(--font);outline:none;resize:vertical;min-height:110px}
+.copy-btn{display:flex;align-items:center;gap:6px;margin-top:10px;padding:9px 18px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--text);color:var(--bg);cursor:pointer;font-size:13px;font-weight:500}
+.copy-btn:hover{opacity:0.85}
+.empty{text-align:center;padding:3rem;color:var(--text3);font-size:14px;grid-column:1/-1}
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#1a1a18;color:#fff;padding:10px 22px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+.loader{text-align:center;padding:3rem;color:var(--text3);font-size:14px;grid-column:1/-1}
+.source-tag{font-size:10px;padding:2px 6px;border-radius:4px;margin-left:4px;vertical-align:middle;background:var(--bg2);color:var(--text3);border:0.5px solid var(--border)}
+.footer{text-align:center;margin-top:2rem;font-size:12px;color:var(--text3)}
+@media(max-width:500px){.header{flex-direction:column}.search-wrap{width:100%}}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-left">
+      <h1><i class="ti ti-terminal-2"></i> Sunit's Command Dashboard</h1>
+      <p>Synced with Google Sheets · Works on any device</p>
+    </div>
+    <div class="sync-row">
+      <div class="search-wrap">
+        <i class="ti ti-search"></i>
+        <input type="text" id="searchInput" placeholder="Search commands..." oninput="render()"/>
+      </div>
+      <button class="sync-btn" onclick="loadFromSheet()">
+        <i class="ti ti-refresh"></i> Sync
+      </button>
+      <span id="statusLabel" style="font-size:12px;color:var(--text3);display:flex;align-items:center">
+        <span class="status-dot" id="statusDot"></span><span id="statusText">Loading...</span>
+      </span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <span style="font-size:12px;color:var(--text3);margin-right:4px">Filter:</span>
+    <button class="tab active" onclick="setTab('all',this)">All</button>
+    <button class="tab" onclick="setTab('office',this)">Office</button>
+    <button class="tab" onclick="setTab('exam',this)">Exam Prep</button>
+    <button class="tab" onclick="setTab('yt',this)">YouTube</button>
+    <button class="tab" onclick="setTab('govt',this)">Govt Work</button>
+    <button class="tab" onclick="setTab('ai',this)">AI / Tech</button>
+  </div>
+
+  <div class="grid" id="grid">
+    <div class="loader"><i class="ti ti-loader" style="font-size:28px;display:block;margin-bottom:8px"></i>Loading from Google Sheets...</div>
+  </div>
+
+  <div class="footer">Sunit Kamal Das · Personal AI Toolkit · Synced via Google Sheets</div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-bg" id="addModal">
+  <div class="modal">
+    <h2 id="modalTitle">Add Custom Command</h2>
+    <div class="field"><label>Command tag (e.g. /mytask)</label><input type="text" id="f-tag" placeholder="/command"/></div>
+    <div class="field"><label>Title</label><input type="text" id="f-title" placeholder="Short title"/></div>
+    <div class="field"><label>Description</label><input type="text" id="f-desc" placeholder="What does this do?"/></div>
+    <div class="field"><label>Prompt sent to Claude</label><textarea id="f-prompt" placeholder="The full prompt text..."></textarea></div>
+    <div class="field"><label>Category</label>
+      <select id="f-cat">
+        <option value="office">Office</option>
+        <option value="exam">Exam Prep</option>
+        <option value="yt">YouTube</option>
+        <option value="govt">Govt Work</option>
+        <option value="ai">AI / Tech</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeAdd()">Cancel</button>
+      <button class="btn-save" id="saveBtn" onclick="saveCmd()">Save Command</button>
+    </div>
+  </div>
+</div>
+
+<!-- Fire Modal -->
+<div class="modal-bg" id="fireModal">
+  <div class="fire-modal">
+    <h2 id="fireTitle">Fire Command</h2>
+    <textarea id="fireText"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button class="copy-btn" onclick="copyPrompt()"><i class="ti ti-copy"></i> Copy prompt</button>
+      <button class="btn-cancel" onclick="closeFire()">Close</button>
+    </div>
+    <p style="font-size:11px;color:var(--text3);margin-top:10px">Paste into Claude.ai, ChatGPT, or any AI chat.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = "https://script.google.com/macros/s/AKfycbxKR56XIT-l4xKX16Q6GnW6vcUQVpqD5yYko28LC1Z_flTTnrUe6a4CiJPxeCj0-AL9/exec";
+
+const DEFAULTS = [
+  {tag:"/enote",title:"Official Note",desc:"Draft a formal govt office note instantly",category:"office",prompt:"/enote ",_default:true},
+  {tag:"/mcq",title:"UPSC/APSC MCQs",desc:"Generate 5 trap-style MCQs on any topic",category:"exam",prompt:"Generate 5 UPSC/APSC-style trap MCQs with detailed explanation on: ",_default:true},
+  {tag:"/revise",title:"Revision Notes",desc:"Bullet-point revision notes for any subject",category:"exam",prompt:"Give me short structured bullet-point revision notes for UPSC/APSC on: ",_default:true},
+  {tag:"/ca",title:"Current Affairs",desc:"Recent Assam/India current affairs digest",category:"exam",prompt:"Give me current affairs notes for APSC/UPSC on: ",_default:true},
+  {tag:"/draft",title:"Draft Letter/Proposal",desc:"Draft official proposals, letters, circulars",category:"office",prompt:"Draft an official government letter/proposal for: ",_default:true},
+  {tag:"/speech",title:"Speech Writer",desc:"Write a speech for any occasion or event",category:"yt",prompt:"Write a speech for: ",_default:true},
+  {tag:"/ytscript",title:"YouTube Script",desc:"Script for Edu Vedanta or Shloka Samarpan",category:"yt",prompt:"Write a YouTube video script for my educational channel on: ",_default:true},
+  {tag:"/qpaper",title:"Question Paper",desc:"Full question paper with marks & sections",category:"exam",prompt:"Create a complete question paper with sections and marks on: ",_default:true},
+  {tag:"/gem",title:"GeM Portal Help",desc:"Steps, tips or drafts for GeM portal tasks",category:"govt",prompt:"Help me with this GeM portal task: ",_default:true},
+  {tag:"/assembly",title:"Assembly Question",desc:"Draft answer for Assam Assembly question",category:"govt",prompt:"Draft an official reply to this Assam Assembly question: ",_default:true},
+  {tag:"/python",title:"Python Help",desc:"Code, explain, debug Python",category:"ai",prompt:"Help me with this Python code/concept: ",_default:true},
+  {tag:"/hack",title:"Ethical Hacking",desc:"Cybersecurity concept, tool or CTF help",category:"ai",prompt:"Explain this ethical hacking / cybersecurity concept: ",_default:true},
+  {tag:"/workout",title:"Workout Plan",desc:"Daily gym routine based on your split",category:"ai",prompt:"Give me today's detailed gym workout plan. My weekly split is chest/back/cardio+abs/legs/arms. Today is: ",_default:true},
+  {tag:"/excel",title:"Excel Formula",desc:"Formula, macro or data tip for MS Excel",category:"ai",prompt:"Help me with this MS Excel formula or task: ",_default:true},
+  {tag:"/ojt",title:"OJT Content",desc:"Trainee content, schedule or report draft",category:"govt",prompt:"Create OJT training content or schedule for: ",_default:true},
+  {tag:"/analyze",title:"Analyze Document",desc:"Summarize or analyze any pasted text/doc",category:"office",prompt:"Analyze and summarize this document: ",_default:true},
+];
+
+const badgeLabels={govt:"Govt",exam:"Exam",yt:"YouTube",office:"Office",ai:"Tech"};
+const icons={office:"ti-file-text",exam:"ti-help-circle",yt:"ti-brand-youtube",govt:"ti-building-arch",ai:"ti-cpu"};
+
+let cmds=[];
+let activeTab="all";
+let editOldTag="";
+
+function setStatus(state,msg){
+  const dot=document.getElementById("statusDot");
+  const txt=document.getElementById("statusText");
+  dot.className="status-dot "+(state==="ok"?"ok":state==="err"?"err":"loading");
+  txt.textContent=msg;
+}
+
+async function loadFromSheet(){
+  setStatus("loading","Syncing...");
+  try{
+    const res=await fetch(API+"?t="+Date.now());
+    const sheetCmds=await res.json();
+    const sheetTags=sheetCmds.map(c=>c.tag);
+    const defaults=DEFAULTS.filter(d=>!sheetTags.includes(d.tag));
+    cmds=[...DEFAULTS.filter(d=>sheetTags.includes(d.tag)).map(d=>({...d,...sheetCmds.find(s=>s.tag===d.tag),_default:true})),
+          ...sheetCmds.filter(s=>!DEFAULTS.find(d=>d.tag===s.tag)),
+          ...defaults];
+    cmds=[...DEFAULTS.map(d=>{const found=sheetCmds.find(s=>s.tag===d.tag);return found?{...d,...found}:d}),...sheetCmds.filter(s=>!DEFAULTS.find(d=>d.tag===s.tag))];
+    setStatus("ok","Synced ✓");
+    render();
+  }catch(e){
+    cmds=DEFAULTS;
+    setStatus("err","Offline — showing defaults");
+    render();
+  }
+}
+
+function setTab(cat,el){
+  activeTab=cat;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  el.classList.add("active");
+  render();
+}
+
+function render(){
+  const q=document.getElementById("searchInput").value.toLowerCase();
+  const filtered=cmds.map((c,i)=>({...c,_i:i})).filter(c=>{
+    const matchTab=activeTab==="all"||c.category===activeTab;
+    const matchQ=!q||c.tag.includes(q)||c.title.toLowerCase().includes(q)||c.desc.toLowerCase().includes(q);
+    return matchTab&&matchQ;
+  });
+  const grid=document.getElementById("grid");
+  if(!filtered.length){grid.innerHTML='<div class="empty"><i class="ti ti-mood-empty" style="font-size:32px;display:block;margin-bottom:8px"></i>No commands found</div>';return;}
+  grid.innerHTML=filtered.map(c=>`
+    <div class="card">
+      <i class="ti ${icons[c.category]||'ti-command'} card-icon"></i>
+      <div class="cmd-tag">${c.tag}</div>
+      <div class="cmd-title">${c.title}
+        <span class="badge badge-${c.category}">${badgeLabels[c.category]}</span>
+        ${c._default?'':'<span class="source-tag">custom</span>'}
+      </div>
+      <div class="cmd-desc">${c.desc}</div>
+      <button class="fire-btn" onclick="openFire(${c._i})"><i class="ti ti-player-play" style="font-size:13px"></i> Fire command</button>
+      <div class="row-btns">
+        <button class="sm-btn" onclick="openEdit(${c._i})"><i class="ti ti-edit" style="font-size:12px"></i> Edit</button>
+        <button class="sm-btn" onclick="deleteCmd(${c._i})"><i class="ti ti-trash" style="font-size:12px"></i> Delete</button>
+      </div>
+    </div>
+  `).join("")+`
+    <div class="add-card" onclick="openAdd()">
+      <i class="ti ti-plus" style="font-size:26px"></i>
+      <span>Add custom command</span>
+      <span style="font-size:11px;color:var(--text3)">Saves to Google Sheets</span>
+    </div>`;
+}
+
+function openFire(i){
+  document.getElementById("fireTitle").textContent=cmds[i].tag+" — "+cmds[i].title;
+  document.getElementById("fireText").value=cmds[i].prompt;
+  document.getElementById("fireModal").classList.add("open");
+}
+function closeFire(){document.getElementById("fireModal").classList.remove("open")}
+function copyPrompt(){
+  navigator.clipboard.writeText(document.getElementById("fireText").value);
+  showToast("Copied! Paste into Claude or any AI ✓");
+}
+
+function openAdd(){
+  editOldTag="";
+  document.getElementById("modalTitle").textContent="Add Custom Command";
+  document.getElementById("saveBtn").textContent="Save to Google Sheets";
+  clearForm();
+  document.getElementById("addModal").classList.add("open");
+}
+function openEdit(i){
+  editOldTag=cmds[i].tag;
+  document.getElementById("modalTitle").textContent="Edit Command";
+  document.getElementById("saveBtn").textContent="Update in Google Sheets";
+  const c=cmds[i];
+  document.getElementById("f-tag").value=c.tag;
+  document.getElementById("f-title").value=c.title;
+  document.getElementById("f-desc").value=c.desc;
+  document.getElementById("f-prompt").value=c.prompt;
+  document.getElementById("f-cat").value=c.category;
+  document.getElementById("addModal").classList.add("open");
+}
+function closeAdd(){document.getElementById("addModal").classList.remove("open")}
+function clearForm(){["f-tag","f-title","f-desc","f-prompt"].forEach(id=>document.getElementById(id).value="");document.getElementById("f-cat").value="office"}
+
+async function saveCmd(){
+  const c={tag:document.getElementById("f-tag").value.trim(),title:document.getElementById("f-title").value.trim(),desc:document.getElementById("f-desc").value.trim(),prompt:document.getElementById("f-prompt").value.trim(),category:document.getElementById("f-cat").value};
+  if(!c.tag||!c.title||!c.prompt){showToast("Please fill tag, title, and prompt");return;}
+  document.getElementById("saveBtn").textContent="Saving...";
+  try{
+    const payload=editOldTag?{action:"edit",oldTag:editOldTag,...c}:{action:"add",...c};
+    await fetch(API,{method:"POST",body:JSON.stringify(payload)});
+    closeAdd();
+    showToast(editOldTag?"Updated in Google Sheets ✓":"Saved to Google Sheets ✓");
+    await loadFromSheet();
+  }catch(e){
+    showToast("Error saving. Check connection.");
+    document.getElementById("saveBtn").textContent="Save to Google Sheets";
+  }
+}
+
+async function deleteCmd(i){
+  if(!confirm("Delete '"+cmds[i].tag+"'?"))return;
+  try{
+    await fetch(API,{method:"POST",body:JSON.stringify({action:"delete",tag:cmds[i].tag})});
+    showToast("Deleted from Google Sheets ✓");
+    await loadFromSheet();
+  }catch(e){
+    showToast("Error deleting. Check connection.");
+  }
+}
+
+function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2800)}
+
+document.getElementById("fireModal").addEventListener("click",e=>{if(e.target===document.getElementById("fireModal"))closeFire()});
+document.getElementById("addModal").addEventListener("click",e=>{if(e.target===document.getElementById("addModal"))closeAdd()});
+
+loadFromSheet();
+</script>
+</body>
+</html>
